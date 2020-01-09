@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: producer-service
+  kafka:
+    producer:
+      bootstrap-servers: kafka-docker_kafka_1:9092,kafka-docker_kafka_2:9092,kafka-docker_kafka_3:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+server:
+  port: 8080
+logging:
+  level:
+    root:
+    org:
+      apache:
+        activemq:
+          artemis: DEBUG

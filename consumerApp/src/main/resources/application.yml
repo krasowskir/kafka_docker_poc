@@ -1,0 +1,18 @@
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: kafka-docker_kafka_1:9092,kafka-docker_kafka_2:9092,kafka-docker_kafka_3:9092
+      group-id: group_id
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+server:
+  port: 8080
+
+logging:
+  level:
+    root:
+    org:
+      apache:
+        activemq:
+          artemis: DEBUG
