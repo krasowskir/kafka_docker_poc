@@ -1,73 +1,97 @@
 version: '2'
 services:
+  # zookeeper:
+  #   image: wurstmeister/zookeeper
+  #   ports:
+  #     - "2181:2181"
+  # kafka0:
+  #   build: .
+  #   ports:
+  #     - "9092"
+  #   expose:
+  #     - "9092"
+  #   environment:
+  #     KAFKA_LISTENERS: 0.0.0.0:9092,kafka0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: 0.0.0.0:9092,kafka0:9092
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  #     KAFKA_CREATE_TOPICS: "testTopic:1:3"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: confluentinc/cp-zookeeper:5.5.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-  kafka0:
-    build: .
+  kafka:
+    image: confluentinc/cp-kafka:5.5.1
+    container_name: kafka
     ports:
-      - "9092"
-    expose:
-      - "9092"
+      - "9092:9092"
+      - "29092:29092"
     environment:
-      KAFKA_LISTENERS: 0.0.0.0:9092,kafka-docker_kafka0_1:9092
-      KAFKA_ADVERTISED_LISTENERS: 127.0.0.1:9092,kafka-docker_kafka0_1:9092
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_CREATE_TOPICS: "testTopic:1:3"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-  kafka1:
-    build: .
-    ports:
-      - "9093:9092"
-    expose:
-      - "9092"
-    environment:
-      KAFKA_LISTENERS: 0.0.0.0:9092,kafka-docker_kafka0_1:9093
-      # KAFKA_ADVERTISED_LISTENERS: kafka-docker_kafka0_1:9092,kafka-docker_kafka1_1:9092,kafka-docker_kafka2_1:9092
-      KAFKA_ADVERTISED_LISTENERS: 127.0.0.1:9092,kafka-docker_kafka0_1:9093
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
-      - "zookeeper"
-      - "kafka0"
-  kafka2:
-    build: .
-    ports:
-      - "9094:9092"
-    expose:
-      - "9092"
-    environment:
-      KAFKA_LISTENERS: 0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: 127.0.0.1:9092,kafka-docker_kafka2_1:9094
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - "zookeeper"
-      - "kafka0"
-      - "kafka1"
+      - zookeeper
+  # kafka1:
+  #   build: .
+  #   ports:
+  #     - "9093:9092"
+  #   expose:
+  #     - "9092"
+  #   environment:
+  #     KAFKA_LISTENERS: 0.0.0.0:9092,kafka_docker_poc_kafka1_1:9093
+  #     # KAFKA_ADVERTISED_LISTENERS: kafka_docker_poc_kafka0_1:9092,kafka_docker_poc_kafka1_1:9092,kafka_docker_poc_kafka2_1:9092
+  #     KAFKA_ADVERTISED_LISTENERS: 127.0.0.1:9092,kafka_docker_poc_kafka1_1:9093
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   depends_on:
+  #     - "zookeeper"
+  #     - "kafka0"
+  # kafka2:
+  #   build: .
+  #   ports:
+  #     - "9094:9092"
+  #   expose:
+  #     - "9092"
+  #   environment:
+  #     KAFKA_LISTENERS: 0.0.0.0:9092
+  #     KAFKA_ADVERTISED_LISTENERS: 127.0.0.1:9092,kafka_docker_poc_kafka2_1:9094
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   depends_on:
+  #     - "zookeeper"
+  #     - "kafka0"
+  #     - "kafka1"
   producer_app:
    build: ./producerApp
    ports:
      - 8081:8080
    privileged: true
    depends_on:
-     - "kafka0"
-     - "kafka1"
-     - "kafka2"
+     - "kafka"
+     # - "kafka1"
+     # - "kafka2"
   consumer_app:
     build: ./consumerApp
     privileged: true
     depends_on:
-      - "kafka0"
-      - "kafka1"
-      - "kafka2"
+      - "kafka"
+      # - "kafka1"
+      # - "kafka2"
