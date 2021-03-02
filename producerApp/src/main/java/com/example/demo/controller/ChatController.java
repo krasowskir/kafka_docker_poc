@@ -18,7 +18,7 @@ public class ChatController {
     public ResponseEntity<String> sendChatMessage() throws IOException, InterruptedException {
         contactProducer.chat();
         Thread.sleep(1000);
-        return new ResponseEntity<>("chat successfully", HttpStatus.ACCEPTED);
+        return new ResponseEntity<String>("chat successfully", HttpStatus.ACCEPTED);
     }
 
     @RequestMapping(value = "/chatLoop")
@@ -27,7 +27,7 @@ public class ChatController {
                                                          @RequestParam("sleep") int sleepMillis) throws IOException, InterruptedException {
         if (!loop) {
                 contactProducer.chat();
-            return new ResponseEntity<>("chat successfully", HttpStatus.ACCEPTED);
+            return new ResponseEntity<String>("chat successfully", HttpStatus.ACCEPTED);
         } else {
             int start = 0;
             while (start <= duration) {
@@ -39,7 +39,7 @@ public class ChatController {
                 Thread.sleep(sleepMillis);
                 start++;
             }
-            return new ResponseEntity<>("chat successfully", HttpStatus.ACCEPTED);
+            return new ResponseEntity<String>("chat successfully", HttpStatus.ACCEPTED);
         }
     }
 
