@@ -8,6 +8,16 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 server:
   port: 8080
+management:
+  server:
+    port: 8082
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    enabled-by-default: true
 logging:
   level:
     root:
